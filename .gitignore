@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+jsconfig.json
+
+logs/
+*.log
+.DS_Store
+.vscode/
+yarn-error.log
+yarn-debug.log
+npm-debug.log
+pnpm-debug.log
