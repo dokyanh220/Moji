@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from "express"
 import dotenv from "dotenv"
 import { connectDB } from "./libs/db.js"
@@ -7,18 +6,12 @@ import userRoute from "./routes/userRoute.js"
 import cookieParser from "cookie-parser"
 import { protectedRoute } from "./middlewares/authMiddleware.js"
 import cors from "cors"
-=======
-import express from 'express'
-import dotenv from 'dotenv'
-import { connectDB } from './libs/db.js'
->>>>>>> origin/master
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5001
 
-<<<<<<< HEAD
 // middlewares
 app.use(express.json())
 app.use(cookieParser())
@@ -36,12 +29,3 @@ connectDB().then(() => {
     console.log(`server bắt đầu trên cổng ${PORT}`)
   })
 })
-=======
-app.use(express.json())
-
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server start with localhost:${PORT}`);
-  })
-})
->>>>>>> origin/master
