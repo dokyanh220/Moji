@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+import mongoose from "mongoose";
+
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_CONNECTIONSTRING);
+    console.log("Liên kết CSDL thành công!");
+  } catch (error) {
+    console.log("Lỗi khi kết nối CSDL:", error);
+    process.exit(1);
+  }
+};
+=======
 import mongoose from 'mongoose'
 
 export const connectDB = async () => {
@@ -9,3 +22,4 @@ export const connectDB = async () => {
     process.exit(1)
   }
 }
+>>>>>>> origin/master
