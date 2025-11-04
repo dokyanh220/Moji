@@ -1,37 +1,42 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "../ui/label";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useNavigate } from "react-router";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Label } from "../ui/label"
+import { useAuthStore } from "@/stores/useAuthStore"
+import { useNavigate } from "react-router"
 
 const signInSchema = z.object({
   username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-});
+})
 
-type SignInFormValues = z.infer<typeof signInSchema>;
+type SignInFormValues = z.infer<typeof signInSchema>
 
 export function SigninForm({ className, ...props }: React.ComponentProps<"div">) {
-  const { signIn } = useAuthStore();
-  const navigate = useNavigate();
+  const { signIn } = useAuthStore()
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
-  });
+  })
 
   const onSubmit = async (data: SignInFormValues) => {
-    const { username, password } = data;
-    await signIn(username, password);
-    navigate("/");
-  };
+    try {
+      const { username, password } = data
+      await signIn(username, password)
+      navigate("/") // Chỉ navigate khi signIn thành công
+    } catch (error) {
+      // Không navigate nếu signIn thất bại
+      console.error("Login failed:", error)
+    }
+  }
 
   return (
     <div
@@ -138,5 +143,5 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
         <a href="#">Chính sách bảo mật</a> của chúng tôi.
       </div>
     </div>
-  );
+  )
 }

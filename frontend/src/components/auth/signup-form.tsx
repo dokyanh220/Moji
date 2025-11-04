@@ -1,13 +1,12 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "../ui/label";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useNavigate } from "react-router";
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Label } from "../ui/label"
+import { useAuthStore } from "@/stores/useAuthStore"
 
 const signUpSchema = z.object({
   firstname: z.string().min(1, "Tên bắt buộc phải có"),
@@ -15,29 +14,26 @@ const signUpSchema = z.object({
   username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
   email: z.email("Email không hợp lệ"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-});
+})
 
-type SignUpFormValues = z.infer<typeof signUpSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
-  const { signUp } = useAuthStore();
-  const navigate = useNavigate();
+  const { signUp } = useAuthStore()
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
-  });
+  })
 
   const onSubmit = async (data: SignUpFormValues) => {
-    const { firstname, lastname, username, email, password } = data;
+    const { firstname, lastname, username, email, password } = data
 
     // gọi backend để signup
-    await signUp(username, password, email, firstname, lastname);
-
-    navigate("/signin");
-  };
+    await signUp(username, password, email, firstname, lastname)
+  }
 
   return (
     <div
@@ -204,5 +200,5 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         <a href="#">Chính sách bảo mật</a> của chúng tôi.
       </div>
     </div>
-  );
+  )
 }

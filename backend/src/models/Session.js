@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const sessionSchema = new mongoose.Schema(
   {
@@ -21,9 +21,9 @@ const sessionSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+)
 
 // tự động xoá khi hết hạn
-sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
-export default mongoose.model("Session", sessionSchema);
+export default mongoose.model("Session", sessionSchema)
