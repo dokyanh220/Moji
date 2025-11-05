@@ -3,27 +3,22 @@ import { useEffect, useState } from "react"
 import { Navigate, Outlet } from "react-router"
 
 const ProtectedRoute = () => {
-  const { accessToken, user, loading, refresh, fetchMe } = useAuthStore()
-  const [starting, setStarting] = useState(true)
-
-  const init = async () => {
-    // có thể xảy ra khi refresh trang
-    if (!accessToken) {
-      await refresh()
-    }
-
-    if (accessToken && !user) {
-      await fetchMe()
-    }
-
-    setStarting(false)
-  }
+  const { accessToken } = useAuthStore()
+  const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
-    init()
+    const bootstrap = async () => {
+      try {
+        // Gọi refresh 1 lần – nếu token còn sống thì hàm refresh() sẽ tự bỏ qua (theo bản store đã tối ưu)
+        await useAuthStore.getState().refresh()
+      } finally {
+        setInitializing(false)
+      }
+    }
+    bootstrap()
   }, [])
 
-  if (starting || loading) {
+  if (initializing) {
     return (
       <div className="flex h-screen items-center justify-center">
         Đang tải trang...
@@ -40,7 +35,7 @@ const ProtectedRoute = () => {
     )
   }
 
-  return <Outlet></Outlet>
+  return <Outlet />
 }
 
 export default ProtectedRoute
