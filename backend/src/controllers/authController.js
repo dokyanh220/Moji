@@ -5,9 +5,8 @@ import jwt from "jsonwebtoken"
 import crypto from "crypto"
 import Session from "../models/Session.js"
 
-const ACCESS_TOKEN_TTL = "30m" // thuờng là dưới 15m
-const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000 // 14 ngày
-
+const ACCESS_TOKEN_TTL = 15 * 60
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000
 export const signUp = async (req, res) => {
   try {
     const { username, password, email, firstName, lastName } = req.body
@@ -39,7 +38,6 @@ export const signUp = async (req, res) => {
     // return
     return res.sendStatus(204)
   } catch (error) {
-    console.error("Lỗi khi gọi signUp", error)
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
 }
@@ -72,7 +70,7 @@ export const signIn = async (req, res) => {
       { userId: user._id },
       // @ts-ignore
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      { expiresIn: `${ACCESS_TOKEN_TTL}s` }
     )
 
     // tạo refresh token
@@ -85,12 +83,13 @@ export const signIn = async (req, res) => {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
     })
 
-    // trả refresh token về trong cookie
+    const isProd = process.env.NODE_ENV === "production"
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none", //backend, frontend deploy riêng
+      secure: isProd,                          
+      sameSite: isProd ? "none" : "lax",       
       maxAge: REFRESH_TOKEN_TTL,
+      path: "/",                               
     })
 
     // Lấy thông tin user (bỏ hashedPassword)
@@ -112,7 +111,6 @@ export const signIn = async (req, res) => {
       user: userData
     })
   } catch (error) {
-    console.error("Lỗi khi gọi signIn", error)
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
 }
@@ -132,7 +130,6 @@ export const signOut = async (req, res) => {
 
     return res.sendStatus(204)
   } catch (error) {
-    console.error("Lỗi khi gọi signOut", error)
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
 }
@@ -155,6 +152,7 @@ export const refreshToken = async (req, res) => {
 
     // kiểm tra hết hạn chưa
     if (session.expiresAt < new Date()) {
+      await Session.deleteOne({ _id: session._id })
       return res.status(403).json({ message: "Token đã hết hạn." })
     }
 
@@ -164,13 +162,12 @@ export const refreshToken = async (req, res) => {
         userId: session.userId,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      { expiresIn: `${ACCESS_TOKEN_TTL}s` }
     )
 
     // return
     return res.status(200).json({ accessToken })
   } catch (error) {
-    console.error("Lỗi khi gọi refreshToken", error)
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
 }

@@ -1,96 +1,150 @@
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 import { toast } from "sonner"
 import { authService } from "@/services/authService"
 import type { AuthState } from "@/types/store"
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  accessToken: null,
-  user: null,
-  loading: false,
-  
-  setAccessToken: (accessToken) => {
-    set({ accessToken })
-  },
-  clearState: () => {
-    set({ accessToken: null, user: null, loading: false })
-  },
+// Khóa chống gọi refresh song song
+let refreshPromise: Promise<string> | null = null
 
-  signUp: async (username, password, email, firstName, lastName) => {
-    try {
-      set({ loading: true })
+// Decode JWT để lấy exp
+const decodeJwt = (token: string) => {
+  try {
+    const [, payload] = token.split(".")
+    return JSON.parse(atob(payload))
+  } catch {
+    return null
+  }
+}
 
-      //  gọi api
-      await authService.signUp(username, password, email, firstName, lastName)
+// Kiểm tra hết hạn hoặc sắp hết (skewSeconds: khoảng đệm)
+const isExpired = (token: string, skewSeconds = 60) => {
+  const decoded = decodeJwt(token)
+  if (!decoded?.exp) return true
+  const nowSec = Date.now() / 1000
+  return decoded.exp - nowSec <= skewSeconds
+}
 
-      toast.success("Đăng ký thành công! Bạn sẽ được chuyển sang trang đăng nhập.")
-    } catch (error) {
-      console.error(error)
-      toast.error("Đăng ký không thành công")
-    } finally {
-      set({ loading: false })
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      accessToken: null,
+      user: null,
+      loading: false,
+
+      setAccessToken: (accessToken: string) => {
+        set({ accessToken })
+      },
+
+      clearState: () => {
+        set({ accessToken: null, user: null })
+      },
+
+      signUp: async (username, password, email, firstName, lastName) => {
+        try {
+          set({ loading: true })
+          await authService.signUp(username, password, email, firstName, lastName)
+          toast.success("Đăng ký thành công! Bạn sẽ được chuyển sang trang đăng nhập.")
+        } catch (error) {
+          console.error(error)
+          toast.error("Đăng ký không thành công")
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      signIn: async (username, password) => {
+        try {
+          set({ loading: true })
+          const { accessToken, user } = await authService.signIn(username, password)
+          set({ accessToken, user })
+          toast.success("Chào mừng bạn quay lại với Moji")
+        } catch (error) {
+          console.error(error)
+          toast.error("Đăng nhập không thành công!")
+          throw error
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      signOut: async () => {
+        try {
+          get().clearState()
+          await authService.signOut()
+          toast.success("Logout thành công!")
+        } catch (error) {
+          console.error(error)
+          toast.error("Lỗi xảy ra khi logout. Hãy thử lại!")
+        }
+      },
+
+      fetchMe: async () => {
+        try {
+          set({ loading: true })
+          const user = await authService.fetchMe()
+          set({ user })
+        } catch (error) {
+          console.error(error)
+          // Không xóa accessToken ngay nếu chỉ lỗi mạng
+          set({ user: null })
+          toast.error("Lỗi lấy dữ liệu người dùng.")
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      // Refresh nhẹ, không set loading toàn cục
+      refresh: async () => {
+        try {
+          const { accessToken, user } = get()
+
+            // Nếu có token và chưa (sắp) hết hạn => không cần refresh
+          if (accessToken && !isExpired(accessToken)) {
+            // Nếu đã có token nhưng chưa có user (lần đầu reload) thì fetch user
+            if (!user) {
+              await get().fetchMe()
+            }
+            return
+          }
+
+          // Nếu đang có refreshPromise thì dùng lại (tránh song song)
+          if (!refreshPromise) {
+            refreshPromise = (async () => {
+              try {
+                const newToken = await authService.refresh()
+                get().setAccessToken(newToken)
+                return newToken
+              } catch (error) {
+                console.error("Refresh error:", error)
+                // Hết hạn thực sự -> clear
+                get().clearState()
+                toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!")
+                throw error
+              } finally {
+                refreshPromise = null
+              }
+            })()
+          }
+
+          await refreshPromise
+
+          // Sau khi refresh thành công mà chưa có user thì gọi fetchMe
+          if (!get().user) {
+            await get().fetchMe()
+          }
+        } catch {
+          // Đã toast bên trong
+        }
+      },
+    }),
+    {
+      name: "moji-auth",
+      // Persist chỉ những gì cần (không persist loading)
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        user: state.user,
+      })
     }
-  },
-
-  signIn: async (username, password) => {
-    try {
-      set({ loading: true })
-
-      const { accessToken, user } = await authService.signIn(username, password)
-      set({ accessToken, user })
-
-      toast.success("Chào mừng bạn quay lại với Moji 🎉")
-    } catch (error) {
-      console.error(error)
-      toast.error("Đăng nhập không thành công!")
-      throw error
-    } finally {
-      set({ loading: false })
-    }
-  },
-
-  signOut: async () => {
-    try {
-      get().clearState()
-      await authService.signOut()
-      toast.success("Logout thành công!")
-    } catch (error) {
-      console.error(error)
-      toast.error("Lỗi xảy ra khi logout. Hãy thử lại!")
-    }
-  },
-
-  fetchMe: async () => {
-    try {
-      set({ loading: true })
-      const user = await authService.fetchMe()
-
-      set({ user })
-    } catch (error) {
-      console.error(error)
-      set({ user: null, accessToken: null })
-      toast.error("Lỗi xảy ra khi lấy dữ liệu người dùng. Hãy thử lại!")
-    } finally {
-      set({ loading: false })
-    }
-  },
-
-  refresh: async () => {
-    try {
-      set({ loading: true })
-      const { user, fetchMe, setAccessToken } = get()
-      const accessToken = await authService.refresh()
-
-      setAccessToken(accessToken)
-
-      if (!user) {
-        await fetchMe()
-      }
-    } catch (error) {
-      console.error(error)
-      toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!")
-      get().clearState()
-    } finally {
-      set({ loading: false })
-    }
-  },
-}))
+  )
+)
