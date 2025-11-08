@@ -119,7 +119,23 @@ export const declineFriendRequest = async (req, res) => {
 
 export const getAllFriends = async (req, res) => {
   try {
-    
+    const userId = req.user._id
+    const friendShips = await Friend.find({
+      $or: [
+        { userA: userId },
+        { userB: userId }
+      ]
+    }).populate('userA', '_id displayName avatarUrl')
+    .populate('userB', '_id displayName avatarUrl').lean()
+
+    if (!friendShips.length) {
+      return res.status(500).json({ friends: [] })
+    }
+
+    // Trong mối quan hệ (friendShips) có 2 trường, id so sánh id của user hiện tại với các id trong quan hệ để lấy id bạn bè
+    const friends = friendShips.map(f => f.userA._id.toString() === userId.toString() ? f.userB : f.userA)
+
+    return res.status(200).json({ friends })
   } catch (error) {
     return res.status(500).json({ message: 'Lỗi tải danh sách bạn bè' })
   }
@@ -127,7 +143,16 @@ export const getAllFriends = async (req, res) => {
 
 export const getFriendsRequest = async (req, res) => {
   try {
+    const userId = req.user._id
     
+    const populateFields = '_id username displayName avatarUrl'
+
+    const [sent, received] = await Promise.all([
+      FriendRequest.find({ from: userId }).populate('to', populateFields),
+      FriendRequest.find({ to: userId }).populate('from', populateFields)
+    ])
+
+    return res.status(200).json({ sent, received })
   } catch (error) {
     return res.status(500).json({ message: 'Lỗi tải danh sách yêu cầu kết bạn' })
   }
