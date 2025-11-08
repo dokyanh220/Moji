@@ -128,7 +128,7 @@ export const signOut = async (req, res) => {
       res.clearCookie("refreshToken")
     }
 
-    return res.sendStatus(204)
+    return res.sendStatus(200).json({ message: 'Đăng xuất thành công' })
   } catch (error) {
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
