@@ -57,7 +57,7 @@ const conversationSchema = new mongoose.Schema(
       required: true
     },
     participants: {
-      type: [participantSchema],
+      type: [participantsSchema],
       required: true
     },
     group: {

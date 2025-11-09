@@ -1,3 +1,50 @@
+import Conversation from "../models/Conversation.js"
+import Message from "../models/Message.js"
+import { updateConversationAfterSendMessage } from "../utils/messageHelper.js"
+
 export const sendDirectMessage = async (req, res) => {
+  try {
+    const { recipientId, content, conversationId } = req.body
+    const senderId = req.user._id
+
+    let conversation // mục đích lưu thông tin cuộc trò chuyện (conversation)
+
+    if(!content) {
+      return res.status(400).json({ message: 'Hãy soạn tin nhắn trước khi gửi' })
+    }
+
+    if(conversationId) {
+      conversation = await Conversation.findById(conversationId)
+    }
+
+    if(!conversation) {
+      conversation = await Conversation.create({
+        type: 'direct',
+        participants: [
+          { userId: senderId },
+          { userId: recipientId, joinedAt: new Date() }
+        ],
+        lastMessageAt: new Date(),
+        unreadCounts: new Map()
+      })
+    }
+
+    const message = await Message.create({
+      conversationId: conversation._id,
+      senderId,
+      content
+    })
+
+    updateConversationAfterSendMessage(conversation, message, senderId)
+
+    await conversation.save()
+
+    return res.status(201).json({ message })
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi gửi tin nhắn' })
+  }
+}
+
+export const sendGroupMessage = async (req, res) => {
   
 }

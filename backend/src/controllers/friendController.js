@@ -1,6 +1,7 @@
 import User from "../models/User.js"
 import FriendRequest from "../models/FriendRequest.js"
 import Friend from "../models/Friend.js"
+import { pair } from "../middlewares/friendMiddleware.js"
 
 export const sendFriendRequest = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ export const sendFriendRequest = async (req, res) => {
     let userA = from.toString()
     let userB = to.toString()
 
-    if (userA > userB) [userA, userB] = [userB, userA]
+    pair(userA, userB)
     
     const [alreadyFriends, existingRequest] = await Promise.all([
       // Kiểm tra người dùng
