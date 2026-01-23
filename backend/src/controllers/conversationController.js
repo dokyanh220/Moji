@@ -1,10 +1,10 @@
 import Conversation from "../models/Conversation.js";
+import Message from "../models/Message.js";
 
 export const createConversation = async (req, res) => {
     try {
         const { type, name, memberIds } = req.body;
         const userId = req.user._id;
-        console.log("🚀 ~ createConversation ~ userId:", userId)
 
         if (
             !type ||
@@ -66,7 +66,6 @@ export const createConversation = async (req, res) => {
         return res.status(201).json({ conversation })
     } 
     catch (error) {
-        console.error("Lỗi tạo conversation:", error)
         return res.status(500).json({ message: "Lỗi server" })
     }
 };
@@ -107,9 +106,41 @@ export const getConversations = async (req, res) => {
 
         return res.status(200).json({conversations: formatted})
     } catch (error) {
-        console.error("Lỗi get conversation:", error)
         return res.status(500).json({ message: "Lỗi server" })
     }
 }
 
-export const getMessages = async (req, res) => {}
+export const getMessages = async (req, res) => {
+    try {
+        const {conversationId} = req.params
+        const {limit = 50, cursor} = req.query
+
+        const query = {conversationId}
+
+        if(cursor) {
+            query.createAt = {$lt: new Date(cursor)}
+        }
+
+        let messages = await Message.find(query)
+            .sort({createAt: -1})
+            .limit(Number(limit) + 1)
+
+        let nextCursor = null
+
+        if (messages.length > Number(limit)) {
+            const nextMessage = messages[messages.length - 1]
+            nextCursor = nextMessage.createdAt.toISOString()
+            messages.pop() 
+        }
+
+        messages = messages.reverse()
+
+        return res.status(200).json({
+            messages,
+            nextCursor
+        })
+    } catch (error) {
+        return res.status(500).json({ message: "Lỗi server" })
+    }
+}
+

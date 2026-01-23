@@ -51,6 +51,27 @@ export const checkFriendShip = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(500).json({ message: 'Lỗi kiểm tra bạn bè' })
+    return res.status(500).json({ message: 'Lỗi server' })
+  }
+}
+
+export const checkGroupMemberShip = async (req, res, next) => {
+  try {
+    const {conversationId} = req.body
+    const userId = req.user._id
+
+    const conversation = await Conversation.findById(conversationId)
+    if (!conversation) { return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" })}
+
+    const isMember = await conversation.participants.some(
+      p => p.userId.toHexString() === userId.toString()
+    )
+    if (!isMember) { return res.status(403).json({ message: "Bạn không thuộc nhóm này" })}
+
+    req.conversation = conversation
+
+    next()
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi server" })
   }
 }

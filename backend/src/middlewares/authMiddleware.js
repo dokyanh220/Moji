@@ -16,8 +16,6 @@ export const protectedRoute = (req, res, next) => {
     // xác nhận token hợp lệ
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedUser) => {
       if (err) {
-        console.error(err)
-
         return res
           .status(403)
           .json({ message: "Access token hết hạn hoặc không đúng" })
@@ -35,7 +33,6 @@ export const protectedRoute = (req, res, next) => {
       next()
     })
   } catch (error) {
-    console.error("Lỗi khi xác minh JWT trong authMiddleware", error)
     return res.status(500).json({ message: "Lỗi hệ thống" })
   }
 }
