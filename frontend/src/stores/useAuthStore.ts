@@ -38,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
 
       clearState: () => {
         set({ accessToken: null, user: null })
+        localStorage.clear()
       },
 
       signUp: async (username, password, email, firstName, lastName) => {
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (username, password) => {
         try {
           set({ loading: true })
+          localStorage.clear()
           const { accessToken, user } = await authService.signIn(username, password)
           set({ accessToken, user })
           toast.success("Chào mừng bạn quay lại với Moji")

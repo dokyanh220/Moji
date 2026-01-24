@@ -57,14 +57,15 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
                   className="mx-auto block w-fit text-center"
                 >
                   <img
-                    src="/logo.svg"
+                    src="/logo.png"
                     alt="logo"
+                    width={180}
                   />
                 </a>
 
                 <h1 className="text-2xl font-bold">Chào mừng quay lại</h1>
                 <p className="text-muted-foreground text-balance">
-                  Đăng nhập vào tài khoản Moji của bạn
+                  Đăng nhập vào tài khoản Memo của bạn
                 </p>
               </div>
 
@@ -79,7 +80,7 @@ export function SigninForm({ className, ...props }: React.ComponentProps<"div">)
                 <Input
                   type="text"
                   id="username"
-                  placeholder="moji"
+                  placeholder="Username"
                   {...register("username")}
                 />
                 {errors.username && (
