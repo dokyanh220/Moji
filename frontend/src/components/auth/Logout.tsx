@@ -1,5 +1,6 @@
 import { Button } from "../ui/button"
 import { useAuthStore } from "@/stores/useAuthStore"
+import { LogOut } from "lucide-react"
 import { useNavigate } from "react-router"
 
 const Logout = () => {
@@ -14,7 +15,10 @@ const Logout = () => {
     }
   }
 
-  return <Button onClick={handleLogout}>Logout</Button>
+  return <Button variant="completeGhost" className="text-red-500" onClick={handleLogout}>
+    <LogOut className="text-red-500" />
+    Đăng xuất
+  </Button>
 }
 
 export default Logout

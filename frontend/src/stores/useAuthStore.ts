@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware"
 import { toast } from "sonner"
 import { authService } from "@/services/authService"
 import type { AuthState } from "@/types/store"
+import { useChatStore } from "./useChatStore"
 
 // Khóa chống gọi refresh song song
 let refreshPromise: Promise<string> | null = null
@@ -39,6 +40,7 @@ export const useAuthStore = create<AuthState>()(
       clearState: () => {
         set({ accessToken: null, user: null })
         localStorage.clear()
+        useChatStore.getState().reset()
       },
 
       signUp: async (username, password, email, firstName, lastName) => {
@@ -58,9 +60,28 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
           localStorage.clear()
+          useChatStore.getState().reset()
           const { accessToken, user } = await authService.signIn(username, password)
+          /**
+           * CÁCH 1:
+           * Backend trả về Combo: [Token + User Info] cùng lúc.
+           * -> Set state luôn, không cần gọi thêm API nào nữa.
+           * -> Nhanh, chỉ tốn 1 Request.
+           */
           set({ accessToken, user })
-          toast.success("Chào mừng bạn quay lại với Moji")
+
+          /**
+           * CÁCH 2:
+           * Nếu Backend chỉ trả về mỗi [Token].
+           * -> 1: Lưu token vào store.
+           * -> 2: Dùng token đó gọi hàm fetchMe() để lấy thông tin User.
+           * -> Chậm hơn, tốn 2 Requests.
+           * get().setAccessToken(accessToken);
+           * await get().fetchMe();
+           */
+
+          useChatStore.getState().fetchConversations()
+          toast.success("Chào mừng bạn quay lại với Memo")
         } catch (error) {
           console.error(error)
           toast.error("Đăng nhập không thành công!")
@@ -141,7 +162,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "moji-auth",
+      name: "memo-auth",
       // Persist chỉ những gì cần (không persist loading)
       partialize: (state) => ({
         accessToken: state.accessToken,

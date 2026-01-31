@@ -273,6 +273,11 @@
     box-shadow: var(--shadow-bubble);
   }
 
+  /* scrollbar */
+  .beautiful-scrollbar {
+    @apply scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent dark:scrollbar-thumb-blue-300;
+  }
+
   /* Animations */
   .transition-bounce {
     transition: var(--transition-bounce);
