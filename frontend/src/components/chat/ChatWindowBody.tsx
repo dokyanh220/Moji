@@ -13,7 +13,7 @@ const ChatWindowBody = () => {
   const [lastMessageStatus, setLastMessageStatus] = useState<"delivered" | "seen">("delivered")
 
   const messages = allMessages[activeConversationId!]?.items ?? []
-  const reversedMessages = [...messages].reverse()
+  const reversedMessages = [...messages]
   const hasMore = allMessages[activeConversationId!]?.hasMore ?? false
   const selectedConvo = conversations.find(
     (c) => c._id === activeConversationId

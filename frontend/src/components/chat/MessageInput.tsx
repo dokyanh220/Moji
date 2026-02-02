@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import { useChatStore } from '@/stores/useChatStore'
 import type { Conversation } from '@/types/chat'
 import { toast } from 'sonner'
+import EmojiPicker from './EmojiPicker'
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   const { user } = useAuthStore()
@@ -52,7 +53,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
 
       <div className="flex-1 relative">
         <Input
-          // onKeyPress={handleKeyPress}
+          onKeyPress={handleKeyPress}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Soạn tin nhắn..."
@@ -66,9 +67,9 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             className="size-8 hover:bg-primary/10 transition-smooth"
           >
             <div>
-              {/* <EmojiPicker
+              <EmojiPicker
                 onChange={(emoji: string) => setValue(`${value}${emoji}`)}
-              /> */}
+              />
             </div>
           </Button>
         </div>

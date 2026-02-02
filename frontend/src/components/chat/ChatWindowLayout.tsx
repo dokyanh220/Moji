@@ -12,7 +12,7 @@ const ChatWindowLayout = () => {
         activeConversationId,
         conversations,
         messageLoading: loading,
-        markAsSeen,
+        // markAsSeen,
     } = useChatStore()
 
     const selectedConvo =
@@ -23,16 +23,16 @@ const ChatWindowLayout = () => {
             return
         }
 
-        const markSeen = async () => {
-            try {
-                await markAsSeen()
-            } catch (error) {
-                console.error("Lỗi khi markSeen", error)
-            }
-        }
+        // const markSeen = async () => {
+        //     try {
+        //         await markAsSeen()
+        //     } catch (error) {
+        //         console.error("Lỗi khi markSeen", error)
+        //     }
+        // }
 
-        markSeen()
-    }, [markAsSeen, selectedConvo])
+        // markSeen()
+    }, [selectedConvo])
 
     if (!selectedConvo) {
         return <ChatWelcomeScreen />
@@ -45,7 +45,7 @@ const ChatWindowLayout = () => {
     return (
         <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-sm shadow-md">
             {/* Header */}
-            <ChatWindowHeader />
+            <ChatWindowHeader chat={selectedConvo}/>
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto bg-primary-foreground">
@@ -53,7 +53,7 @@ const ChatWindowLayout = () => {
             </div>
 
             {/* Footer */}
-            <MessageInput/>
+            <MessageInput selectedConvo={selectedConvo}/>
         </SidebarInset>
     )
 }

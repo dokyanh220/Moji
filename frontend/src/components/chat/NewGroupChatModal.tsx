@@ -2,7 +2,7 @@
 
 const NewGroupChatModal = () => {
   return (
-    <div>NewGroupChatModal</div>
+    <div>NGC</div>
   )
 }
 

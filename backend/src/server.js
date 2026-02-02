@@ -9,10 +9,10 @@ import friendRoute from "./routes/friendRoute.js"
 import messageRoute from "./routes/messageRoute.js"
 import conversationRoute from "./routes/conversationRoute.js"
 import { protectedRoute } from "./middlewares/authMiddleware.js"
+import { io, server, app } from "./socket/index.js"
 
 dotenv.config()
 
-const app = express()
 const PORT = process.env.PORT || 5001
 
 app.use(cors({
@@ -35,7 +35,7 @@ app.use("/api/messages", messageRoute)
 app.use("/api/conversations", conversationRoute)
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`server bắt đầu trên cổng ${PORT}`)
   })
 })

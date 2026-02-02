@@ -143,7 +143,7 @@
 
     /* Chat bubbles in dark mode */
     --chat-bubble-sent: 217 91% 60%;
-    --chat-bubble-sent-foreground: 222 47% 11%;
+    --chat-bubble-sent-foreground: 210 40% 98%;
     --chat-bubble-received: 217.2 32.6% 17.5%;
     --chat-bubble-received-foreground: 210 40% 98%;
 

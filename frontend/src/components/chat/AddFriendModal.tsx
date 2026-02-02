@@ -2,7 +2,7 @@
 
 const AddFriendModal = () => {
   return (
-    <div>AddFriendModal</div>
+    <div>ADM</div>
   )
 }
 
