@@ -275,7 +275,7 @@
 
   /* scrollbar */
   .beautiful-scrollbar {
-    @apply scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent dark:scrollbar-thumb-blue-300;
+    @apply scrollbar-thin scrollbar-thumb-slate-100 scrollbar-track-transparent dark:scrollbar-thumb-slate-900;
   }
 
   /* Animations */
