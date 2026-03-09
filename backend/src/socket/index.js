@@ -8,9 +8,13 @@ const app = express()
 
 const server = http.createServer(app)
 
+const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim()).filter(Boolean)
+    : ["http://localhost:5173"]
+
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL,
+        origin: allowedOrigins,
         credentials: true
     }
 })
